@@ -1,0 +1,50 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: java21
+spec:
+  components:
+    - name: java21-2
+      type: artifact
+      properties:
+        jarFileName: 5542df7e-5cca-4dbc-829f-491a28fb9c40
+        javaVersion: "21"
+        storageAccountSecret: storage-secret
+        port: 8080
+        javaagent: "-javaagent:/app-insights/agents/applicationinsights-agent.jar"
+      traits:
+        - type: ingress-1-20
+          properties:
+            domain: java21-2.local
+            http:
+              "/": 8080
+        - type: scaler
+          properties:
+            replicas: 1
+        - type: monitoring
+          properties:
+            type: ApplicationInsights
+            monitoringSettingsSecret: monitoringsettings-secret
+    - name: java21-3
+      type: artifact
+      properties:
+        jarFileName: 569d16fa-baaa-4cb6-89c7-d9f0bd3fde35
+        javaVersion: "21"
+        storageAccountSecret: storage-secret
+        port: 8080
+        javaagent: ""
+      traits:
+        - type: ingress-1-20
+          properties:
+            domain: java21-3.local
+            http:
+              "/": 8080
+        - type: scaler
+          properties:
+            replicas: 2
+  policies:
+    - name: java21
+      type: blue-green
+      properties:
+        active: java21-3
+        port: 8080
